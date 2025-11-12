@@ -1,6 +1,5 @@
-package com.dyusov.notes.ui.theme
+package com.dyusov.notes.presentation.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

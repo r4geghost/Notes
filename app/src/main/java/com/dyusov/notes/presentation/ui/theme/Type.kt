@@ -1,4 +1,4 @@
-package com.dyusov.notes.ui.theme
+package com.dyusov.notes.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
