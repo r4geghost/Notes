@@ -45,24 +45,36 @@ class NotesViewModel : ViewModel() {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
+        addSomeNotes()
         query
+            // обновление состояния экрана
+            .onEach { input ->
+                _state.update { it.copy(query = input) }
+            }
             // произойдет переключение на другой тип данных flow (список заметок)
             // latest - отменяет предыдущие подписки при изменении объекта flow
-            .flatMapLatest {
-                if (it.isBlank()) {
-                    searchNoteUseCase(it)
+            .flatMapLatest { input ->
+                if (input.isBlank()) {
+                    searchNoteUseCase(input)
                 } else {
                     getAllNotesUseCase()
                 }
             }
-            .onEach {
-                val pinned = it.filter { note -> note.isPinned }
-                val other = it.filter { note -> !note.isPinned }
+            .onEach { notes ->
+                val pinned = notes.filter { note -> note.isPinned }
+                val other = notes.filter { note -> !note.isPinned }
                 _state.update {
                     it.copy(pinnedNotes = pinned, otherNotes = other)
                 }
             }
             .launchIn(scope)
+    }
+
+    // todo: temp
+    private fun addSomeNotes() {
+        repeat(50) {
+            addNoteUseCase(title = "Title №$it", content = "Content №$it")
+        }
     }
 
     fun processCommand(command: NotesCommand) {
@@ -72,12 +84,15 @@ class NotesViewModel : ViewModel() {
             }
 
             is NotesCommand.EditNote -> {
-                val title = command.note.title
+                val note = getNoteUseCase(command.note.id) // todo: temp
+                val title = note.title
                 editNoteUseCase(note = command.note.copy(title = "$title edited"))
             }
 
             is NotesCommand.InputSearchQuery -> {
-
+                query.update {
+                    command.query.trim()
+                }
             }
 
             is NotesCommand.SwitchPinnedStatus -> {

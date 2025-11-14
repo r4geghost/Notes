@@ -13,9 +13,16 @@ object TestNotesRepositoryImpl : NotesRepository {
     private val notesListFlow = MutableStateFlow<List<Note>>(listOf())
 
 
-    override fun addNote(note: Note) {
-        notesListFlow.update { // update заменит старую коллекцию на новую
-            it + note // оператор "+" преопределен - создается новая коллекция с элементом
+    override fun addNote(title: String, content: String) {
+        notesListFlow.update { oldList -> // update заменит старую коллекцию на новую
+            val note = Note(
+                id = oldList.size,
+                title = title,
+                content = content,
+                updatedAt = System.currentTimeMillis(),
+                isPinned = false
+            )
+            oldList + note // оператор "+" преопределен - создается новая коллекция с элементом
         }
     }
 
