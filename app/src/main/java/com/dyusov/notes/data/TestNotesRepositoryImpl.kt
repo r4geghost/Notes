@@ -42,7 +42,7 @@ object TestNotesRepositoryImpl : NotesRepository {
                 if (it.id == note.id) {
                     note
                 } else {
-                    note
+                    it
                 }
             }
         }
