@@ -55,9 +55,9 @@ class NotesViewModel : ViewModel() {
             // latest - отменяет предыдущие подписки при изменении объекта flow
             .flatMapLatest { input ->
                 if (input.isBlank()) {
-                    searchNoteUseCase(input)
-                } else {
                     getAllNotesUseCase()
+                } else {
+                    searchNoteUseCase(input)
                 }
             }
             .onEach { notes ->
