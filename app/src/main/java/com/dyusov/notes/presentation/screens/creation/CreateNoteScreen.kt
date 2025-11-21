@@ -22,6 +22,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -37,7 +38,8 @@ import com.dyusov.notes.presentation.utils.DateFormatter
 @Composable
 fun CreateNoteScreen(
     modifier: Modifier = Modifier,
-    viewModel: CreateNoteViewModel = viewModel()
+    viewModel: CreateNoteViewModel = viewModel(),
+    onFinished: () -> Unit
 ) {
 
     val state by viewModel.state.collectAsState() // используем делегат
@@ -182,7 +184,22 @@ fun CreateNoteScreen(
         }
 
         CreateNoteState.Finished -> {
+        /*
+            @Composable функции должны выполнять только отрисовку и реагировать на действия
+            пользователя. Поэтому в случае, когда необходимо выполнить какие-то действия за
+            пределами ответственности @Composable функции, нужно использовать функцию SideEffect()
 
+            Она в качестве параметра принимает callback, но без аннотации @Composable!
+            Callback будет вызываться каждый раз при рекомпозиции
+            Если нужно вызвать callback только один раз при первой отрисовке,
+            используется функция LaunchedEffect().
+
+            Ей нужно передать key (ключ) - при рекомпозиции будет проверка ключа на соответствие
+            - в случае изменения будет вызван callback
+        */
+            LaunchedEffect(key1 = Unit) {
+                onFinished()
+            }
         }
     }
 }
