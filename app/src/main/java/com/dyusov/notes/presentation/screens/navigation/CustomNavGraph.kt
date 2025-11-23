@@ -33,7 +33,8 @@ fun NavGraph() {
             NotesScreen(
                 // для перехода на другой экран вызываем функцию navigate у navController
                 onNoteClick = {
-                    navController.navigate(Screen.EditNote.route)
+                    // edit_note/{note_id}, где {note_id} - параметр (id заметки)
+                    navController.navigate(Screen.EditNote.createRoute(noteId = it.id))
                 },
                 onAddNoteClick = {
                     navController.navigate(Screen.CreateNote.route)
@@ -49,11 +50,13 @@ fun NavGraph() {
             )
         }
         composable(Screen.EditNote.route) {
+            // получаем id заметки из аргументов
+            val noteId = Screen.EditNote.getNoteId(it.arguments)
             EditNoteScreen(
                 onFinished = {
                     navController.popBackStack()
                 },
-                noteId = 5 // TODO: temp
+                noteId = noteId
             )
         }
     }
