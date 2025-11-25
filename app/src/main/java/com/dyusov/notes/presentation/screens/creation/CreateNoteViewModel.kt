@@ -1,17 +1,18 @@
 package com.dyusov.notes.presentation.screens.creation
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dyusov.notes.data.TestNotesRepositoryImpl
+import com.dyusov.notes.data.NotesRepositoryImpl
 import com.dyusov.notes.domain.AddNoteUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CreateNoteViewModel : ViewModel() {
+class CreateNoteViewModel(context: Context) : ViewModel() {
 
-    private val repository = TestNotesRepositoryImpl
+    private val repository = NotesRepositoryImpl.getInstance(context)
 
     private val addNoteUseCase = AddNoteUseCase(repository)
 

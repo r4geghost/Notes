@@ -1,5 +1,6 @@
 package com.dyusov.notes.presentation.screens.notes
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +51,10 @@ import com.dyusov.notes.presentation.utils.DateFormatter
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
-    viewModel: NotesViewModel = viewModel(),
+    context: Context = LocalContext.current.applicationContext, // контекст передаем отдельным параметром
+    viewModel: NotesViewModel = viewModel {
+        NotesViewModel(context)
+    },
     onNoteClick: (Note) -> Unit,
     onAddNoteClick: () -> Unit
 ) {
@@ -80,7 +85,7 @@ fun NotesScreen(
     ) { innerPadding ->
 
         // Добавляем текст, когда нет ни одной заметки
-        if (state.otherNotes.isEmpty()) {
+        if (state.otherNotes.isEmpty() && state.pinnedNotes.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center

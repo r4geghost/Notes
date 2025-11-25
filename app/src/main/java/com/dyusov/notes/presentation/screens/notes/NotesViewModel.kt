@@ -2,9 +2,10 @@
 
 package com.dyusov.notes.presentation.screens.notes
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dyusov.notes.data.TestNotesRepositoryImpl
+import com.dyusov.notes.data.NotesRepositoryImpl
 import com.dyusov.notes.domain.GetAllNotesUseCase
 import com.dyusov.notes.domain.Note
 import com.dyusov.notes.domain.SearchNoteUseCase
@@ -18,8 +19,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class NotesViewModel : ViewModel() {
-    private val repository = TestNotesRepositoryImpl // временно нарушаем принцип чистой архитектуры
+class NotesViewModel(context: Context) : ViewModel() {
+    private val repository = NotesRepositoryImpl.getInstance(context) // временно нарушаем принцип чистой архитектуры
 
     private val getAllNotesUseCase = GetAllNotesUseCase(repository)
     private val searchNoteUseCase = SearchNoteUseCase(repository)

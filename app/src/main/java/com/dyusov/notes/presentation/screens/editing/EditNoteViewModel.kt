@@ -1,8 +1,9 @@
 package com.dyusov.notes.presentation.screens.editing
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dyusov.notes.data.TestNotesRepositoryImpl
+import com.dyusov.notes.data.NotesRepositoryImpl
 import com.dyusov.notes.domain.DeleteNoteUseCase
 import com.dyusov.notes.domain.EditNoteUseCase
 import com.dyusov.notes.domain.GetNoteUseCase
@@ -12,9 +13,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 // нужно обязательно передавать id заметки, которую редактируем
-class EditNoteViewModel(private val noteId: Int) : ViewModel() {
+class EditNoteViewModel(private val noteId: Int, context: Context) : ViewModel() {
 
-    private val repository = TestNotesRepositoryImpl
+    private val repository = NotesRepositoryImpl.getInstance(context)
 
     private val editNoteUseCase = EditNoteUseCase(repository)
     private val getNoteUseCase = GetNoteUseCase(repository)
