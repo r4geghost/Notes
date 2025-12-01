@@ -1,8 +1,9 @@
 package com.dyusov.notes.domain
 
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class GetAllNotesUseCase(
+class GetAllNotesUseCase @Inject constructor(
     private val repository: NotesRepository
 ) {
     /* избегаем дублирования, если добавить operator, можем вызывать эту функцию без указания имени:

@@ -1,6 +1,5 @@
 package com.dyusov.notes.presentation.screens.notes
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -35,13 +34,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dyusov.notes.R
 import com.dyusov.notes.domain.Note
 import com.dyusov.notes.presentation.ui.theme.OtherNotesColors
@@ -51,10 +49,7 @@ import com.dyusov.notes.presentation.utils.DateFormatter
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
-    context: Context = LocalContext.current.applicationContext, // контекст передаем отдельным параметром
-    viewModel: NotesViewModel = viewModel {
-        NotesViewModel(context)
-    },
+    viewModel: NotesViewModel = hiltViewModel(),
     onNoteClick: (Note) -> Unit,
     onAddNoteClick: () -> Unit
 ) {

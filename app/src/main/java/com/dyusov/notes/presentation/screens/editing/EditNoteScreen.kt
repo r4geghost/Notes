@@ -2,7 +2,6 @@
 
 package com.dyusov.notes.presentation.screens.editing
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,13 +28,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputContent
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputTitle
 import com.dyusov.notes.presentation.utils.DateFormatter
@@ -44,11 +42,11 @@ import com.dyusov.notes.presentation.utils.DateFormatter
 fun EditNoteScreen(
     modifier: Modifier = Modifier,
     noteId: Int,
-    context: Context = LocalContext.current.applicationContext, // контекст передаем отдельным параметром
-    viewModel: EditNoteViewModel = viewModel {
-        // указываем, каким способом нужно создать экземпляр EditNoteViewModel (фабрика)
-        EditNoteViewModel(noteId, context)
-    },
+    viewModel: EditNoteViewModel = hiltViewModel(
+        creationCallback = { factory: EditNoteViewModel.Factory ->
+            factory.create(noteId)
+        }
+    ),
     onFinished: () -> Unit
 ) {
 

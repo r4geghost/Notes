@@ -1,25 +1,32 @@
 package com.dyusov.notes.presentation.screens.editing
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dyusov.notes.data.NotesRepositoryImpl
 import com.dyusov.notes.domain.DeleteNoteUseCase
 import com.dyusov.notes.domain.EditNoteUseCase
 import com.dyusov.notes.domain.GetNoteUseCase
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 // нужно обязательно передавать id заметки, которую редактируем
-class EditNoteViewModel(private val noteId: Int, context: Context) : ViewModel() {
+@HiltViewModel(assistedFactory = EditNoteViewModel.Factory::class)
+class EditNoteViewModel @AssistedInject constructor(
+    private val editNoteUseCase: EditNoteUseCase,
+    private val getNoteUseCase: GetNoteUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    @Assisted("noteId") private val noteId: Int
+) : ViewModel() {
 
-    private val repository = NotesRepositoryImpl.getInstance(context)
-
-    private val editNoteUseCase = EditNoteUseCase(repository)
-    private val getNoteUseCase = GetNoteUseCase(repository)
-    private val deleteNoteUseCase = DeleteNoteUseCase(repository)
+    @AssistedFactory
+    interface Factory {
+        fun create(@Assisted("noteId") noteId: Int): EditNoteViewModel
+    }
 
     private val _state = MutableStateFlow<EditNoteState>(
         EditNoteState.Initial

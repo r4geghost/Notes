@@ -1,30 +1,15 @@
 package com.dyusov.notes.data
 
-import android.content.Context
 import com.dyusov.notes.domain.Note
 import com.dyusov.notes.domain.NotesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class NotesRepositoryImpl private constructor(context: Context) : NotesRepository {
-
-    private val notesDatabase = NotesDatabase.getInstance(context) // TODO: temp
+class NotesRepositoryImpl @Inject constructor(
+    private val notesDatabase: NotesDatabase
+) : NotesRepository {
     private val notesDao = notesDatabase.notesDao()
-
-    companion object {
-        private val LOCK = Any()
-        private var instance: NotesRepositoryImpl? = null
-
-        fun getInstance(context: Context): NotesRepositoryImpl {
-            instance?.let { return it }
-
-            synchronized(LOCK) {
-                instance?.let { return it }
-
-                return NotesRepositoryImpl(context).also { instance = it }
-            }
-        }
-    }
 
     override suspend fun addNote(
         title: String,
