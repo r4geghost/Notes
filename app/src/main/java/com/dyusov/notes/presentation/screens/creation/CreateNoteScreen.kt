@@ -2,6 +2,9 @@
 
 package com.dyusov.notes.presentation.screens.creation
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.dyusov.notes.presentation.ui.theme.CustomIcons
 import com.dyusov.notes.presentation.utils.DateFormatter
 
 @Composable
@@ -43,6 +47,13 @@ fun CreateNoteScreen(
 ) {
 
     val state by viewModel.state.collectAsState() // используем делегат
+
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(), // получение контента
+        onResult = { uri ->
+            Log.d("CreateNoteScreen", "uri=${uri.toString()}")
+        }
+    )
 
     when (val currentState = state) {
         is CreateNoteState.Creation -> {
@@ -74,9 +85,23 @@ fun CreateNoteScreen(
                                 contentDescription = "Back to main screen",
                             )
                         },
+                        // кнопка "добавить изображение"
+                        actions = {
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 24.dp)
+                                    .clickable {
+                                        imagePicker.launch("image/*") // передаем MIME тип
+                                    },
+                                // кастомная иконка
+                                imageVector = CustomIcons.AddPhoto,
+                                contentDescription = "Add photo from gallery",
+                            )
+                        },
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = Color.Transparent,
-                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                            actionIconContentColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                 }
