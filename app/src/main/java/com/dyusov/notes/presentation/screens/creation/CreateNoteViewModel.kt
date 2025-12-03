@@ -27,13 +27,9 @@ class CreateNoteViewModel @Inject constructor(
                 is CreateNoteCommand.InputTitle -> {
                     _state.update { currentState ->
                         if (currentState is CreateNoteState.Creation) {
-                            currentState.copy(
-                                title = command.title,
-                                // если заголовок и контент не пустой, делаем кнопку "save" активной
-                                isSavedEnabled = currentState.title.isNotBlank() && currentState.content.isNotBlank()
-                            )
+                            currentState.copy(title = command.title)
                         } else {
-                            CreateNoteState.Creation(title = command.title)
+                            currentState // сюда мы вообще не должны попасть
                         }
                     }
                 }
@@ -41,13 +37,18 @@ class CreateNoteViewModel @Inject constructor(
                 is CreateNoteCommand.InputContent -> {
                     _state.update { currentState ->
                         if (currentState is CreateNoteState.Creation) {
-                            currentState.copy(
-                                content = command.content,
-                                // если заголовок и контент не пустой, делаем кнопку "save" активной
-                                isSavedEnabled = currentState.title.isNotBlank() && currentState.content.isNotBlank()
-                            )
+                            val newContent = currentState.content
+                                .mapIndexed { index, item ->
+                                    // меняем контент только там, где были изменения
+                                    if (index == command.index && item is ContentItem.Text) {
+                                        item.copy(content = command.content)
+                                    } else {
+                                        item
+                                    }
+                                }
+                            currentState.copy(content = newContent)
                         } else {
-                            CreateNoteState.Creation(content = command.content)
+                            currentState // сюда мы вообще не должны попасть
                         }
                     }
                 }
@@ -56,10 +57,13 @@ class CreateNoteViewModel @Inject constructor(
                     _state.update { currentState ->
                         // если состояние создания, вызываем метод UseCase и сохраняем заметку
                         if (currentState is CreateNoteState.Creation) {
-                            val content = ContentItem.Text(content = currentState.content)
+                            val content = currentState.content.filter {
+                                // сохраняем либо изображения, либо непустой текст
+                                it !is ContentItem.Text || it.content.isNotBlank()
+                            }
                             addNoteUseCase(
                                 title = currentState.title,
-                                content = listOf(content)
+                                content = content
                             )
                             CreateNoteState.Finished // устанавливаем состояние завершения
                         } else {
@@ -70,6 +74,30 @@ class CreateNoteViewModel @Inject constructor(
 
                 CreateNoteCommand.Back -> {
                     _state.update { CreateNoteState.Finished }
+                }
+
+                is CreateNoteCommand.AddImage -> {
+                    _state.update { currentState ->
+                        if (currentState is CreateNoteState.Creation) {
+                            // работаем со текущим списком контента
+                            currentState.content.toMutableList().apply {
+                                val lastContentItem = last()
+                                // удаляем последний элемент, если это пустая строка текста
+                                if (lastContentItem is ContentItem.Text && lastContentItem.content.isBlank()) {
+                                    removeAt(lastIndex)
+                                }
+                                // добавляем изображение
+                                add(ContentItem.Image(command.uri.toString()))
+                                // добавляем пустую строку (чтобы пользователь мог продолжать)
+                                add(ContentItem.Text(""))
+                            }.let {
+                                // обновляем состояние экрана, применяя изменения в контенте
+                                currentState.copy(content = it)
+                            }
+                        } else {
+                            currentState
+                        }
+                    }
                 }
             }
         }

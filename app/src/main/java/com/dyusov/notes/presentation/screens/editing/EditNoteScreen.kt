@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dyusov.notes.domain.ContentItem
+import com.dyusov.notes.presentation.screens.TextContent
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputContent
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputTitle
 import com.dyusov.notes.presentation.utils.DateFormatter
@@ -153,7 +154,7 @@ fun EditNoteScreen(
                             TextContent(
                                 modifier = Modifier.weight(1f),
                                 text = item.content,
-                                onTextChange = {
+                                onTextChanged = {
                                     viewModel.processCommand(InputContent(content = it))
                                 }
                             )
@@ -191,40 +192,4 @@ fun EditNoteScreen(
             }
         }
     }
-}
-
-@Composable
-private fun TextContent(
-    modifier: Modifier = Modifier,
-    text: String,
-    onTextChange: (String) -> Unit
-) {
-    TextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        value = text,
-        onValueChange = onTextChange,
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-        ),
-        textStyle = TextStyle(
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onSurface
-        ),
-        placeholder = {
-            Text(
-                text = "Note something down...",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onSurface
-                    .copy(alpha = 0.2f), // изменяем прозрачность, ставим 20%
-
-            )
-        }
-    )
 }

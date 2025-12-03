@@ -2,7 +2,6 @@
 
 package com.dyusov.notes.presentation.screens.creation
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -36,6 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.dyusov.notes.domain.ContentItem
+import com.dyusov.notes.presentation.screens.TextContent
 import com.dyusov.notes.presentation.ui.theme.CustomIcons
 import com.dyusov.notes.presentation.utils.DateFormatter
 
@@ -51,7 +53,9 @@ fun CreateNoteScreen(
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(), // получение контента
         onResult = { uri ->
-            Log.d("CreateNoteScreen", "uri=${uri.toString()}")
+            uri?.let {
+                viewModel.processCommand(CreateNoteCommand.AddImage(uri))
+            }
         }
     )
 
@@ -149,38 +153,38 @@ fun CreateNoteScreen(
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    // контент заметки
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .weight(1f),
-                        value = currentState.content,
-                        onValueChange = { content ->
-                            viewModel.processCommand(CreateNoteCommand.InputContent(content = content))
-                        },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                        ),
-                        textStyle = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        placeholder = {
-                            Text(
-                                text = "Note something down...",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onSurface
-                                    .copy(alpha = 0.2f), // изменяем прозрачность, ставим 20%
 
-                            )
+                    LazyColumn(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // контент заметки
+                        currentState.content.forEachIndexed { index, item ->
+                            item(key = index) {
+                                when (item) {
+                                    is ContentItem.Image -> {
+                                        TextContent(
+                                            text = item.url,
+                                            onTextChanged = {} // todo: temp
+                                        )
+                                    }
+
+                                    is ContentItem.Text -> {
+                                        TextContent(
+                                            text = item.content,
+                                            onTextChanged = { content ->
+                                                viewModel.processCommand(
+                                                    CreateNoteCommand.InputContent(
+                                                        content = content,
+                                                        index = index
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
-                    )
+                    }
                     // кнопка "сохранить"
                     Button(
                         shape = RoundedCornerShape(18.dp),
@@ -188,7 +192,7 @@ fun CreateNoteScreen(
                         onClick = {
                             viewModel.processCommand(CreateNoteCommand.Save)
                         },
-                        enabled = currentState.isSavedEnabled, // активна или нет
+                        enabled = currentState.isSaveEnabled, // активна или нет
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             disabledContainerColor = MaterialTheme.colorScheme.primary
