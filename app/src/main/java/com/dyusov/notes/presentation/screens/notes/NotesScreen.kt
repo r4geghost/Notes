@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,12 +36,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil3.compose.AsyncImage
 import com.dyusov.notes.R
 import com.dyusov.notes.domain.ContentItem
 import com.dyusov.notes.domain.Note
@@ -192,23 +197,51 @@ fun NotesScreen(
                 */
                 key = { _, note -> note.id }
             ) { index, otherNote ->
-                NoteCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    note = otherNote,
-                    // по клику будет переход на другой экран
-                    // за навигацию будет отвечать другая @Composable функция
-                    // поэтому передает callback
-                    onNoteClick = onNoteClick,
-                    onLongNoteClick = {
-                        viewModel.processCommand(
-                            NotesCommand.SwitchPinnedStatus(otherNote.id)
-                        )
-                    },
-                    backgroundColor = OtherNotesColors[index % OtherNotesColors.size] // цвет заметки
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                val imageUrl = otherNote.content
+                    .filterIsInstance<ContentItem.Image>()
+                    .map { it.url }
+                    .firstOrNull()
+
+                if (imageUrl == null) {
+                    NoteCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        note = otherNote,
+                        // по клику будет переход на другой экран
+                        // за навигацию будет отвечать другая @Composable функция
+                        // поэтому передает callback
+                        onNoteClick = onNoteClick,
+                        onLongNoteClick = {
+                            viewModel.processCommand(
+                                NotesCommand.SwitchPinnedStatus(otherNote.id)
+                            )
+                        },
+                        backgroundColor = OtherNotesColors[index % OtherNotesColors.size] // цвет заметки
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                } else {
+                    NoteCardWithImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        note = otherNote,
+                        imageUrl = imageUrl,
+                        // по клику будет переход на другой экран
+                        // за навигацию будет отвечать другая @Composable функция
+                        // поэтому передает callback
+                        onNoteClick = onNoteClick,
+                        onLongNoteClick = {
+                            viewModel.processCommand(
+                                NotesCommand.SwitchPinnedStatus(otherNote.id)
+                            )
+                        },
+                        backgroundColor = OtherNotesColors[index % OtherNotesColors.size] // цвет заметки
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+
             }
         }
     }
@@ -310,35 +343,133 @@ private fun NoteCard(
                     onLongNoteClick(note)
                 }
             )
-            .padding(16.dp),
-
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-        // Заголовок заметки
-        Text(
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            text = note.title,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        // Отступ между элементами
-        Spacer(modifier = Modifier.height(8.dp))
+            // Заголовок заметки
+            Text(
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                text = note.title,
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            // Отступ между элементами
+            Spacer(modifier = Modifier.height(4.dp))
 
-        // Время последнего изменения заметки
-        Text(
-            text = DateFormatter.formatDateToString(note.updatedAt),
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        // Отступ между элементами
-        Spacer(modifier = Modifier.height(24.dp))
+            // Время последнего изменения заметки
+            Text(
+                text = DateFormatter.formatDateToString(note.updatedAt),
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
 
-        // Контент заметки
+            // Текстовый контент заметки
+            note.content
+                .filterIsInstance<ContentItem.Text>()
+                .filter { it.content.isNotBlank() }
+                .joinToString("\n") { it.content }
+                .takeIf { it.isNotEmpty() }
+                ?.let {
+                    // Отступ между элементами
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        maxLines = 3, // ограничение на кол-во строк
+                        overflow = TextOverflow.Ellipsis, // стратегия если текст вылез за пределы контейнера (многоточие)
+                        text = it,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+        }
+    }
+}
+
+@Composable
+fun NoteCardWithImage(
+    modifier: Modifier = Modifier,
+    note: Note,
+    imageUrl: String,
+    backgroundColor: Color,
+    // используем callback
+    onNoteClick: (Note) -> Unit,
+    onLongNoteClick: (Note) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(backgroundColor)
+            // для реагирования на разные виды нажатий/кликов
+            .combinedClickable(
+                onClick = {
+                    onNoteClick(note)
+                },
+                onLongClick = {
+                    onLongNoteClick(note)
+                }
+            )
+    ) {
+        Box() {
+            // Картинки в заметке (берем первую)
+            AsyncImage(
+                modifier = Modifier
+                    .heightIn(max = 120.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp)),
+                model = imageUrl, // ссылка на картинку
+                contentDescription = "First image from note",
+                contentScale = ContentScale.FillWidth
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp)
+            ) {
+                // Заголовок заметки
+                Text(
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    text = note.title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = LocalTextStyle.current.copy(
+                        shadow = Shadow(
+                            color = Color.Black, // Color of the shadow
+                            blurRadius = 100f    // Blur radius of the shadow
+                        )
+                    )
+                )
+
+                // Время последнего изменения заметки
+                Text(
+                    text = DateFormatter.formatDateToString(note.updatedAt),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = LocalTextStyle.current.copy(
+                        shadow = Shadow(
+                            color = Color.Black, // Color of the shadow
+                            blurRadius = 100f      // Blur radius of the shadow
+                        )
+                    )
+                )
+            }
+        }
+        // Текстовый контент заметки
         note.content
             .filterIsInstance<ContentItem.Text>()
+            .filter { it.content.isNotBlank() }
             .joinToString("\n") { it.content }
-            .let {
+            .takeIf { it.isNotEmpty() }
+            ?.let {
                 Text(
+                    modifier = Modifier.padding(16.dp),
                     maxLines = 3, // ограничение на кол-во строк
                     overflow = TextOverflow.Ellipsis, // стратегия если текст вылез за пределы контейнера (многоточие)
                     text = it,
