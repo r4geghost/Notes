@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,8 +34,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -235,9 +234,7 @@ fun NotesScreen(
                             viewModel.processCommand(
                                 NotesCommand.SwitchPinnedStatus(otherNote.id)
                             )
-                        },
-                        backgroundColor = OtherNotesColors[index % OtherNotesColors.size] // цвет заметки
-                    )
+                        })
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
@@ -394,7 +391,6 @@ fun NoteCardWithImage(
     modifier: Modifier = Modifier,
     note: Note,
     imageUrl: String,
-    backgroundColor: Color,
     // используем callback
     onNoteClick: (Note) -> Unit,
     onLongNoteClick: (Note) -> Unit
@@ -402,7 +398,13 @@ fun NoteCardWithImage(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(backgroundColor)
+            // добавляем градиент - от прозрачного до темного сверху вниз
+            .background(brush = Brush.verticalGradient(
+                listOf(
+                    Color.Transparent,
+                    MaterialTheme.colorScheme.primary
+                )
+            ))
             // для реагирования на разные виды нажатий/кликов
             .combinedClickable(
                 onClick = {
@@ -437,13 +439,7 @@ fun NoteCardWithImage(
                     text = note.title,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = LocalTextStyle.current.copy(
-                        shadow = Shadow(
-                            color = Color.Black, // Color of the shadow
-                            blurRadius = 100f    // Blur radius of the shadow
-                        )
-                    )
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
 
                 // Время последнего изменения заметки
@@ -451,13 +447,7 @@ fun NoteCardWithImage(
                     text = DateFormatter.formatDateToString(note.updatedAt),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = LocalTextStyle.current.copy(
-                        shadow = Shadow(
-                            color = Color.Black, // Color of the shadow
-                            blurRadius = 100f      // Blur radius of the shadow
-                        )
-                    )
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
