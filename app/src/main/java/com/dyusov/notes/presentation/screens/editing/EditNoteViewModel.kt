@@ -41,9 +41,13 @@ class EditNoteViewModel @AssistedInject constructor(
         viewModelScope.launch {
             _state.update {
                 val note = getNoteUseCase(noteId) // noteId из конструктора!
-                Log.d("Content", note.content.toString())
+                val content = if (note.content.lastOrNull() !is Text) {
+                    note.content + Text("")
+                } else {
+                    note.content
+                }
                 // устанавливаем состояние редактирования заметки
-                EditNoteState.Editing(note)
+                EditNoteState.Editing(note.copy(content = content))
             }
         }
     }
