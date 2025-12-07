@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase
 
 // Room создаст за нас БД, поэтому класс абстрактный
 @Database(
-    entities = [NoteDbModel::class], // таблицы в БД, требуется список Kotlin классов
-    version = 2,
+    entities = [NoteDbModel::class, ContentItemDbModel::class], // таблицы в БД, требуется список Kotlin классов
+    version = 3,
     exportSchema = false // не нужна история версий БД (false)
 )
 abstract class NotesDatabase : RoomDatabase() {

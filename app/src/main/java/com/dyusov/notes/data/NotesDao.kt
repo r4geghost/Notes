@@ -11,15 +11,22 @@ interface NotesDao {
     /* Room будет автоматически оповещать о каждом изменении в БД, если используется Flow */
 
     @Query("SELECT * FROM notes ORDER BY updatedAt DESC")
-    fun getAllNotes(): Flow<List<NoteDbModel>>
+    fun getAllNotes(): Flow<List<NoteWithContentDbModel>>
 
     @Query("SELECT * FROM notes WHERE id == :noteId")
-    suspend fun getNote(noteId: Int): NoteDbModel
+    suspend fun getNote(noteId: Int): NoteWithContentDbModel
 
-    @Query("SELECT * FROM notes " +
-            "WHERE title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%'" +
-            "ORDER BY updatedAt DESC") // '||' - конкатенация строк
-    fun searchNotes(query: String): Flow<List<NoteDbModel>>
+    @Query(
+        """
+        SELECT DISTINCT notes.* 
+        FROM notes JOIN content ON notes.id == content.noteId
+        WHERE title LIKE '%'||:query||'%' 
+        OR content LIKE '%'||:query||'%' 
+        AND contentType == 'TEXT'
+        ORDER BY updatedAt DESC
+    """
+    ) // '||' - конкатенация строк
+    fun searchNotes(query: String): Flow<List<NoteWithContentDbModel>>
 
     @Query("DELETE FROM notes WHERE id == :noteId")
     suspend fun deleteNote(noteId: Int)
@@ -30,4 +37,10 @@ interface NotesDao {
     // для вставки запрос писать не нужно, при конфликте - обновление записи
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addNote(note: NoteDbModel)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addNoteContent(content: List<ContentItemDbModel>)
+
+    @Query("DELETE FROM content WHERE noteId == :noteId")
+    suspend fun deleteNoteContent(noteId: Int)
 }
