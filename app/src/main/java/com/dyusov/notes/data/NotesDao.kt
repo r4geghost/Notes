@@ -36,7 +36,7 @@ interface NotesDao {
 
     // для вставки запрос писать не нужно, при конфликте - обновление записи
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addNote(note: NoteDbModel)
+    suspend fun addNote(note: NoteDbModel): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addNoteContent(content: List<ContentItemDbModel>)

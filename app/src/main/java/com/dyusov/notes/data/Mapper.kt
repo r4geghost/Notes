@@ -2,53 +2,64 @@ package com.dyusov.notes.data
 
 import com.dyusov.notes.domain.ContentItem
 import com.dyusov.notes.domain.Note
-import kotlinx.serialization.json.Json
 
 fun Note.toDbModel(): NoteDbModel {
     return NoteDbModel(
         id = id,
         title = title,
-        content = Json.encodeToString(content.toContentItemDbModels()),
         updatedAt = updatedAt,
         isPinned = isPinned
     )
 }
 
-fun NoteDbModel.toEntity(): Note {
+// extension-функция на класс заметки с контентом
+fun NoteWithContentDbModel.toEntity(): Note {
     return Note(
-        id = id,
-        title = title,
-        content = Json.decodeFromString<List<ContentItemDbModel>>(content).toContentItems(),
-        updatedAt = updatedAt,
-        isPinned = isPinned
+        id = noteDbModel.id,
+        title = noteDbModel.title,
+        content = content.toContentItems(),
+        updatedAt = noteDbModel.updatedAt,
+        isPinned = noteDbModel.isPinned
     )
 }
 
-fun List<NoteDbModel>.toEntities(): List<Note> {
+fun List<NoteWithContentDbModel>.toEntities(): List<Note> {
     return map { it.toEntity() }
 }
 
-fun List<ContentItem>.toContentItemDbModels(): List<ContentItemDbModel> {
-    return map {item ->
-        when(item) {
+fun List<ContentItem>.toContentItemDbModels(noteId: Int): List<ContentItemDbModel> {
+    return mapIndexed { index, item ->
+        when (item) {
             is ContentItem.Image -> {
-                ContentItemDbModel.Image(url = item.url)
+                ContentItemDbModel(
+                    noteId = noteId,
+                    contentType = ContentType.IMAGE,
+                    content = item.url, // для картинок храним просто url
+                    order = index // порядковый номер
+                )
             }
+
             is ContentItem.Text -> {
-                ContentItemDbModel.Text(content = item.content)
+                ContentItemDbModel(
+                    noteId = noteId,
+                    contentType = ContentType.TEXT,
+                    content = item.content,
+                    order = index // порядковый номер
+                )
             }
         }
     }
 }
 
 fun List<ContentItemDbModel>.toContentItems(): List<ContentItem> {
-    return map {item ->
-        when(item) {
-            is ContentItemDbModel.Image -> {
-                ContentItem.Image(url = item.url)
-            }
-            is ContentItemDbModel.Text -> {
+    return map { item ->
+        when (item.contentType) {
+            ContentType.TEXT -> {
                 ContentItem.Text(content = item.content)
+            }
+
+            ContentType.IMAGE -> {
+                ContentItem.Image(url = item.content)
             }
         }
     }

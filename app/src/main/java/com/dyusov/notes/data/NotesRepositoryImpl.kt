@@ -18,15 +18,17 @@ class NotesRepositoryImpl @Inject constructor(
         updatedAt: Long,
         isPinned: Boolean
     ) {
-        val note = Note(
+        val processedContent = content.processForStorage()
+        val noteDbModel = NoteDbModel(
             id = 0, // если id = 0, БД сама сгенерирует id
             title = title,
-            content = content.processForStorage(),
             updatedAt = updatedAt,
             isPinned = isPinned
         )
-        val noteDbModel = note.toDbModel()
-        notesDao.addNote(noteDbModel)
+        val noteId = notesDao.addNote(noteDbModel).toInt() // добавляем заметку и получаем id
+
+        val contentItems = processedContent.toContentItemDbModels(noteId)
+        notesDao.addNoteContent(contentItems) // добавляем контент
     }
 
     override suspend fun deleteNote(noteId: Int) {
@@ -52,6 +54,9 @@ class NotesRepositoryImpl @Inject constructor(
         val processedNote = note.copy(content = processedContent)
 
         notesDao.addNote(processedNote.toDbModel()) // используем ранее созданный маппер
+        // сначала удаляем весь прошлый контент, а затем добавляем новый
+        notesDao.deleteNoteContent(note.id)
+        notesDao.addNoteContent(processedContent.toContentItemDbModels(note.id))
     }
 
     override fun getAllNotes(): Flow<List<Note>> {
@@ -71,7 +76,7 @@ class NotesRepositoryImpl @Inject constructor(
     }
 
     private suspend fun List<ContentItem>.processForStorage(): List<ContentItem> {
-        return map {contentItem ->
+        return map { contentItem ->
             when (contentItem) {
                 is ContentItem.Image -> {
                     if (imageFileManager.isFileInternal(contentItem.url)) {
@@ -81,6 +86,7 @@ class NotesRepositoryImpl @Inject constructor(
                         ContentItem.Image(imageFileManager.copyImageToInternStorage(contentItem.url))
                     }
                 }
+
                 is ContentItem.Text -> contentItem
             }
         }
