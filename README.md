@@ -10,7 +10,7 @@ This is a personal learning project to explore modern Android development practi
 
 ## Features
 
-- Create, edit, and delete text-based notes
+- Create, edit, and delete notes with text and images
 - Search through existing notes by content
 - Pin important notes for quick access
 - Organize notes with automatic timestamps
@@ -101,7 +101,6 @@ This project serves as a learning platform for:
 
 ## Future Improvements
 
-- Add support for images and rich text formatting in notes
 - Implement note categories/tags
 - Dark mode theme toggle
 - Widget for quick note access
