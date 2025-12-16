@@ -1,5 +1,6 @@
 # Notes
 
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/meekieD/Notes)](https://github.com/meekieD/Notes/releases)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-blue.svg)](https://kotlinlang.org/)
 [![Android](https://img.shields.io/badge/Android-API%2024%2B-green.svg)](https://developer.android.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
