@@ -1,9 +1,9 @@
 # Notes
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/meekieD/Notes)](https://github.com/meekieD/Notes/releases)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-blue.svg)](https://kotlinlang.org/)
-[![Android](https://img.shields.io/badge/Android-API%2024%2B-green.svg)](https://developer.android.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/meekieD/Notes?logo=github)](https://github.com/meekieD/Notes/releases)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Android](https://img.shields.io/badge/Android-API_24%2B-blue.svg?logo=android)](https://developer.android.com/studio/releases/platforms)
+
 
 A modern Android notes application built with Kotlin and Jetpack Compose.
 This is a personal learning project to explore modern Android development practices, including Clean Architecture, MVVM, and Room database.
