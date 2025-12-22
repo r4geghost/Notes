@@ -45,23 +45,17 @@ app/
 
 ## Screenshots
 
-### Splash screen
-![Splash screen](/screenshots/photo_1.jpg)
+<p float="left">
+  <img src="/screenshots/photo_1.jpg" width="250" />
+  <img src="/screenshots/photo_2.jpg" width="250" />
+  <img src="/screenshots/photo_3.jpg" width="250" />
+</p>
 
-### Main screen
-![Main screen](/screenshots/photo_2.jpg)
-
-### Main screen with pinned note
-![Main screen with pinned note](/screenshots/photo_3.jpg)
-
-### Note details screen with edit functionality
-![Note Details](/screenshots/photo_4.jpg)
-
-### Note creation screen
-![See/edit note](/screenshots/photo_5.jpg)
-
-### Search notes
-![Search notes](/screenshots/photo_6.jpg)
+<p float="left">
+  <img src="/screenshots/photo_4.jpg" width="250" />
+  <img src="/screenshots/photo_5.jpg" width="250" />
+  <img src="/screenshots/photo_6.jpg" width="250" />
+</p>
 
 ## Setup & Installation
 
